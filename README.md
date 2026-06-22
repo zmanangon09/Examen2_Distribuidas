@@ -1,6 +1,6 @@
 # Fintech SecurePay — Bitácora de Evaluación
 
-**Estudiante:** Zoe Manangón  
+**Estudiante:** Zaith Manangón  
 **Materia:** Aplicaciones Distribuidas  
 **Evaluación:** Segundo Parcial Práctico  
 
@@ -116,8 +116,8 @@ Se ejecutó `keypair.sh` para generar el par de llaves RSA en formato PKCS#8:
 
 | Tipo de Error | Código HTTP | ¿Alerta a Sentry? | Descripción |
 |---------------|-------------|-------------------|-------------|
-| Token expirado/malformado | 401 / 403 | ❌ NO | Error lógico controlado |
-| Conexión interrumpida con Clúster | 500 | ✅ SÍ | Error operacional con Tags de usuario |
+| Token expirado/malformado | 401 / 403 |  NO | Error lógico controlado |
+| Conexión interrumpida con Clúster | 500 |  SÍ | Error operacional con Tags de usuario |
 
 ### Instrumentación
 
