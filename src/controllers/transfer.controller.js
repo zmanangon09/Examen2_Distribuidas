@@ -1,3 +1,4 @@
+const Sentry = require('@sentry/node');
 const TransactionService = require('../services/transaction.service');
 const validationService = require('../services/validation.service');
 const balanceService = require('../services/balance.service');
@@ -17,8 +18,11 @@ const transactionService = new TransactionService({
  * POST /v1/transfer-beta/execute
  * 
  * Espera un cuerpo JSON con: { fromAccountId, toAccountId, amount }
+ * 
+ * OBSERVABILIDAD: Este endpoint simula un fallo de conexión a la base de datos
+ * de saldos (Error Operacional 500) que se reporta a Sentry con Tags del usuario.
  */
-function executeTransfer(req, res) {
+function executeTransfer(req, res, next) {
   try {
     const { fromAccountId, toAccountId, amount } = req.body;
 
@@ -29,14 +33,18 @@ function executeTransfer(req, res) {
       });
     }
 
-    const result = transactionService.executeTransfer(fromAccountId, toAccountId, Number(amount));
-    return res.status(200).json(result);
+    // --- ERROR OPERACIONAL SIMULADO ---
+    // Simula un fallo de conexión al Clúster de Datos SecurePay
+    // Este error 500 DEBE alertar a Sentry con Tags del usuario afectado
+    Sentry.setTag('userId', req.user.sub);
+    Sentry.setTag('userName', req.user.name);
+    Sentry.setUser({ id: req.user.sub, email: req.user.name });
+
+    throw new Error('Conexión interrumpida con el Clúster de Datos SecurePay');
+
   } catch (error) {
-    // Si la validación o deducción falla en los servicios, se maneja como error bad request.
-    return res.status(400).json({
-      error: 'Error en la transacción',
-      message: error.message
-    });
+    // Propagar el error al middleware de Sentry para que lo capture como Error Operacional 500
+    next(error);
   }
 }
 

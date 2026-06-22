@@ -1,9 +1,7 @@
-// TODO (Estudiante): Configurar e inicializar Sentry Node SDK para la observabilidad ANTES de importar Express o cualquier otra librería.
-// Pistas:
-// const Sentry = require('@sentry/node');
-// Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 1.0 });
+// Importación de Sentry ANTES de cualquier otra librería (requisito de observabilidad)
+require('./src/instrument');
 
-require('dotenv').config();
+const Sentry = require('@sentry/node');
 const express = require('express');
 const routes = require('./src/routes');
 
@@ -25,8 +23,10 @@ app.get('/', (req, res) => {
   });
 });
 
+// Integrar el middleware de errores de Sentry (captura errores operacionales 500)
+Sentry.setupExpressErrorHandler(app);
+
 // Manejo centralizado de excepciones y reporte a Sentry
-// TODO (Estudiante): Integrar el middleware de errores de Sentry: Sentry.setupExpressErrorHandler(app);
 app.use((err, req, res, next) => {
   console.error('[SERVER ERROR]:', err);
   res.status(500).json({
@@ -38,7 +38,8 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
   console.log(`🚀 Servidor Fintech ejecutándose en: http://localhost:${PORT}`);
-  console.log(`   - Balance Alpha: GET http://localhost:${PORT}/v1/account-alpha/balance`);
+  console.log(`   - Login:              POST http://localhost:${PORT}/v1/auth/login`);
+  console.log(`   - Balance Alpha:      GET  http://localhost:${PORT}/v1/account-alpha/balance`);
   console.log(`   - Transferencia Beta: POST http://localhost:${PORT}/v1/transfer-beta/execute`);
   console.log(`======================================================\n`);
 });
